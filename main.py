@@ -11,7 +11,7 @@ with open('model_Logistic.pkl', 'rb') as file:
 app = FastAPI()
 
 # Configuración de CORS
-origins = ["*"] 
+origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -20,11 +20,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Verificación estado de servicio
+@app.options("/predict")
+def options_predict():
+    return {"status": "ok"}
+
 # Definimos la ruta para hacer predicciones
 @app.post("/predict")
 def predict(data: dict):
-    datos_pred = pd.DataFrame(data)
+    print("Datos recibidos:", data) # Impresión de datos recibidos
+    datos_pred = pd.DataFrame({key: [value] for key, value in data.items()})
     features = datos_pred[selected_features]
     prediccion = model.predict(features)
-    
+    print("Predicción:", prediccion.tolist()) # Impresión de resultado
+
     return {"prediction": prediccion.tolist()}
